@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from srresnet import _NetG
 from dataset import DatasetFromHdf5
 from torchvision import models
+from random import shuffle
 import torch.utils.model_zoo as model_zoo
 
 # Training settings
@@ -47,9 +48,17 @@ def main():
     cudnn.benchmark = True
 
     print("===> Loading datasets")
-    train_set = DatasetFromHdf5("../train/DIV2K_train_320_HDF5/DIV2K_x4_Part1.h5")
-    training_data_loader = DataLoader(dataset=train_set, num_workers=opt.threads, \
-        batch_size=opt.batchSize, shuffle=True)
+    training_data_loaders = []
+    random_order = [i for i in range(4)]
+    for i in range(4):
+        filename = "../train/DIV2K_train_320_HDF5/DIV2K_x4_Part" + str(i+1) + ".h5"
+        train_set = DatasetFromHdf5(filename)
+        training_data_loader = DataLoader(dataset=train_set,
+                                          num_workers=opt.threads, \
+                                          batch_size=opt.batchSize,
+                                          shuffle=True)
+        training_data_loaders.append(training_data_loader)
+
 
     if opt.vgg_loss:
         print('===> Loading VGG model')
@@ -101,7 +110,9 @@ def main():
 
     print("===> Training")
     for epoch in range(opt.start_epoch, opt.nEpochs + 1):
-        train(training_data_loader, optimizer, model, criterion, epoch)
+        shuffle(random_order)
+        for idx in random_order:
+            train(training_data_loaders[idx], optimizer, model, criterion, epoch)
         save_checkpoint(model, epoch)
 
 def adjust_learning_rate(optimizer, epoch):
