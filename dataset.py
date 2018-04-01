@@ -5,18 +5,18 @@ import h5py
 from os import listdir
 from os.path import join
 from skimage.io import imread
-from torchvision.transforms import Compose, CenterCrop, ToTensor, Resize
+# from torchvision.transforms import Compose, CenterCrop, ToTensor, Resize
 
 def is_image_file(filename):
     return any(filename.endswith(extension) for extension in [".png", ".jpg", ".jpeg"])
 
 
-def input_transform(crop_size, upscale_factor):
-    return Compose([
-        CenterCrop(crop_size),
-        Resize(crop_size // upscale_factor),
-        ToTensor(),
-    ])
+# def input_transform(crop_size, upscale_factor):
+#     return Compose([
+#         CenterCrop(crop_size),
+#         Resize(crop_size // upscale_factor),
+#         ToTensor(),
+#     ])
 
 
 def target_transform(crop_size):
@@ -49,14 +49,14 @@ class DatasetFromFolder(data.Dataset):
         super(DatasetFromFolder, self).__init__()
         self.image_filenames = [join(image_dir, x) for x in listdir(image_dir) if is_image_file(x)]
 
-        self.input_transform = input_transform(crop_size, upscale_factor)
+        # self.input_transform = input_transform(crop_size, upscale_factor)
         self.target_transform = target_transform(crop_size)
 
     def __getitem__(self, index):
         input = imread(self.image_filenames[index])
         target = input.copy()
-        if self.input_transform:
-            input = self.input_transform(input)
+        # if self.input_transform:
+        #     input = self.input_transform(input)
         if self.target_transform:
             target = self.target_transform(target)
 
