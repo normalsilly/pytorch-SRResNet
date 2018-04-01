@@ -1,11 +1,8 @@
-import matlab.engine
 import argparse, os
 import torch
 import torch.nn as nn
 import numpy as np
-import time, math, glob
-import scipy.io as sio
-import cv2
+from math import log10
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
 from dataset import DatasetFromFolder
@@ -19,19 +16,9 @@ parser.add_argument("--gpus", default="0", type=str, help="gpu ids (default: 0)"
 parser.add_argument("--batchSize", type=int, default=16, help="testing batch size")
 parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 
-def PSNR(pred, gt, shave_border=0):
-    height, width = pred.shape[:2]
-    pred = pred[shave_border:height - shave_border, shave_border:width - shave_border]
-    gt = gt[shave_border:height - shave_border, shave_border:width - shave_border]
-    imdff = pred - gt
-    rmse = math.sqrt(np.mean(imdff ** 2))
-    if rmse == 0:
-        return 100
-    return 20 * math.log10(255.0 / rmse)
 
 opt = parser.parse_args()
 cuda = opt.cuda
-eng = matlab.engine.start_matlab()
 
 if cuda:
     print("=> use gpu id: '{}'".format(opt.gpus))
@@ -50,7 +37,7 @@ if cuda:
     model = model.cuda()
     criterion = criterion.cuda()
 
-avg_psnr = 0
+avg_psnr = 0.0
 for batch in testing_data_loader:
     input, target = Variable(batch[0]), Variable(batch[1])
     if cuda:
