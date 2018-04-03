@@ -1,6 +1,7 @@
 import torch.utils.data as data
 import torch
 import h5py
+import numpy as np
 
 from os import listdir
 from os.path import join
@@ -9,25 +10,6 @@ from skimage.io import imread
 
 def is_image_file(filename):
     return any(filename.endswith(extension) for extension in [".png", ".jpg", ".jpeg"])
-
-
-# def input_transform(crop_size, upscale_factor):
-#     return Compose([
-#         CenterCrop(crop_size),
-#         Resize(crop_size // upscale_factor),
-#         ToTensor(),
-#     ])
-
-
-def target_transform(crop_size):
-    return Compose([
-        CenterCrop(crop_size),
-        ToTensor(),
-    ])
-
-
-def calculate_valid_crop_size(crop_size, upscale_factor):
-    return crop_size - (crop_size % upscale_factor)
 
 
 class DatasetFromHdf5(data.Dataset):
@@ -44,23 +26,35 @@ class DatasetFromHdf5(data.Dataset):
         return self.data.shape[0]
 
 
-class DatasetFromFolder(data.Dataset):
-    def __init__(self, image_dir, upscale_factor=4):
-        super(DatasetFromFolder, self).__init__()
-        self.image_filenames = [join(image_dir, x) for x in listdir(image_dir) if is_image_file(x)]
+class DataValSet_test(data.Dataset):
+    def __init__(self, root, list_path, mean=(128, 128, 128)):
+        self.root = root
+        self.list_path = list_path
+        self.mean = mean
+        self.img_ids = [i_id.strip() for i_id in open(list_path)]
 
-        # self.input_transform = input_transform(crop_size, upscale_factor)
-        self.target_transform = target_transform(crop_size)
-
-    def __getitem__(self, index):
-        input = imread(self.image_filenames[index])
-        target = input.copy()
-        # if self.input_transform:
-        #     input = self.input_transform(input)
-        if self.target_transform:
-            target = self.target_transform(target)
-
-        return input, target
+        self.files = []
+        for name in self.img_ids:
+            LR_file = join(self.root, "LR/%s.png" % name)
+            HR_file = join(self.root, "HR/%s.png" % name)
+            self.files.append({
+                "lr": LR_file,
+                "hr": HR_file
+            })
 
     def __len__(self):
-        return len(self.image_filenames)
+        return len(self.files)
+
+    def __getitem__(self, index):
+        datafiles = self.files[index]
+
+        LR_image = imread(datafiles["lr"])
+        LR_image = LR_image.transpose((2, 0, 1))
+        LR_image = np.asarray(LR_image, np.float32)
+        LR_image /= 255
+
+        HR_image = imread(datafiles["hr"])
+        HR_image = HR_image.transpose((2, 0, 1))
+        HR_image = np.asarray(HR_image, np.float32)
+        HR_image /= 255
+        return LR_image.copy(), HR_image.copy()
