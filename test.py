@@ -22,15 +22,15 @@ parser.add_argument("--batchSize", type=int, default=16, help="testing batch siz
 parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 
 
-def test(test_gen, model, criterion, gpuid, SR_dir):
+def test(test_gen, model, criterion, SR_dir):
     avg_psnr = 0
     avg_psnr2 = 0
     avg_time = 0
 
     for iteration, batch in enumerate(test_gen, 1):
         input,  target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True)
-        input = input.cuda(gpuid)
-        target = target.cuda(gpuid)
+        input = input.cuda()
+        target = target.cuda()
 
         start = time.clock()
         Blur_SR = model(input)
@@ -40,7 +40,7 @@ def test(test_gen, model, criterion, gpuid, SR_dir):
         im_h[im_h > 1.] = 1.
         avg_time += (time.clock() - start)
 
-        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda(gpuid)
+        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
 
         result = transforms.ToPILImage()(SR.cpu().data[0])
         path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
@@ -91,7 +91,7 @@ if cuda:
     model = model.cuda()
     criterion = criterion.cuda()
 
-test(testloader, model, criterion, opt.gpus, SR_dir)
+test(testloader, model, criterion, SR_dir)
 
 #
 # avg_psnr = 0.0
