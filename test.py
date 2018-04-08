@@ -12,9 +12,10 @@ from torchvision import transforms
 from os.path import join
 
 import sys
-
+from importlib import reload
 reload(sys)
 sys.setdefaultencoding('utf8')
+
 DATA_LIST_PATH = '../test/val.txt'
 
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
