@@ -11,6 +11,10 @@ from dataset import DataValSet_test
 from torchvision import transforms
 from os.path import join
 
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 DATA_LIST_PATH = '../test/val.txt'
 
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
