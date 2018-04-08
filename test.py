@@ -11,10 +11,6 @@ from dataset import DataValSet_test
 from torchvision import transforms
 from os.path import join
 
-import sys
-from importlib import reload
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 DATA_LIST_PATH = '../test/val.txt'
 
