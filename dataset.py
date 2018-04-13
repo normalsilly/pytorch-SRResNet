@@ -35,9 +35,11 @@ class DataValSet_test(data.Dataset):
 
         self.files = []
         for name in self.img_ids:
+            LLR_file = join(self.root, "LLR/%s.png" % name)
             LR_file = join(self.root, "LR/%s.png" % name)
             HR_file = join(self.root, "HR/%s.png" % name)
             self.files.append({
+                "llr": LLR_file,
                 "lr": LR_file,
                 "hr": HR_file
             })
@@ -48,6 +50,11 @@ class DataValSet_test(data.Dataset):
     def __getitem__(self, index):
         datafiles = self.files[index]
 
+        LLR_image = imread(datafiles["llr"])
+        LLR_image = LLR_image.transpose((2, 0, 1))
+        LLR_image = np.asarray(LLR_image, np.float32)
+        LLR_image /= 255
+
         LR_image = imread(datafiles["lr"])
         LR_image = LR_image.transpose((2, 0, 1))
         LR_image = np.asarray(LR_image, np.float32)
@@ -57,4 +64,4 @@ class DataValSet_test(data.Dataset):
         HR_image = HR_image.transpose((2, 0, 1))
         HR_image = np.asarray(HR_image, np.float32)
         HR_image /= 255
-        return LR_image.copy(), HR_image.copy()
+        return LLR_image.copy(), LR_image.copy(), HR_image.copy()

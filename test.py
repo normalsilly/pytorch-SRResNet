@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 import time
 import math
+import pandas as pd
 from math import log10
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
@@ -68,13 +69,6 @@ if cuda:
     os.environ["CUDA_VISIBLE_DEVICES"] = opt.gpus
     if not torch.cuda.is_available():
             raise Exception("No GPU found or Wrong gpu id, please run without --cuda")
-#
-# model = torch.load(opt.model)["model"]
-# criterion = nn.MSELoss()
-#
-# image_dir = "../test/"
-# test_set = DatasetFromFolder(image_dir, opt.scale)
-# testing_data_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.batchSize, shuffle=False)
 
 print("===> Loading datasets")
 root_val_dir = '../test/'
@@ -94,16 +88,61 @@ if cuda:
 
 test(testloader, model, criterion, SR_dir)
 
-#
-# avg_psnr = 0.0
-# for batch in testing_data_loader:
-#     input, target = Variable(batch[0]), Variable(batch[1])
-#     if cuda:
-#         input = input.cuda()
-#         target = target.cuda()
-#
-#     prediction = model(input)
-#     mse = criterion(prediction, target)
-#     psnr = 10 * log10(1 / mse.data[0])
-#     avg_psnr += psnr
-# print("===> Avg. PSNR: {:.4f} dB".format(avg_psnr / len(testing_data_loader)))
+eval(testloader, model, criterion, SR_dir)
+
+def eval(test_gen, model, criterion, SR_dir):
+    avg_psnr = 0
+    avg_psnr_low = 0
+    avg_time = 0
+    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR
+    # TODO:  再把SR降到（SR/4）'来比较
+    for iteration, batch in enumerate(test_gen, 1):
+        input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
+        input_low = input_low.cuda()
+        input = input.cuda()
+        target = target.cuda()
+
+        start = time.clock()
+        Blur_SR_low = model(input_low)
+        Blur_SR = model(input)
+
+        im_h = Blur_SR.cpu().data[0].numpy().astype(np.float32)
+        im_h[im_h < 0] = 0
+        im_h[im_h > 1.] = 1.
+
+        im_h_low = Blur_SR_low.cpu().data[0].numpy().astype(np.float32)
+        im_h_low[im_h_low < 0] = 0
+        im_h_low[im_h_low > 1.] = 1.
+        avg_time += (time.clock() - start)
+
+        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
+        SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
+
+        result = transforms.ToPILImage()(SR.cpu().data[0])
+        result_low = transforms.ToPILImage()(SR_low.cpu().data[0])
+        path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
+        path_low = join(SR_dir, '{0:04d}_RE_low.jpg'.format(iteration))
+        result.save(path)
+        result_low.save(path_low)
+        mse = criterion(SR, target)
+        mse_low = criterion(SR_low, input)
+        psnr = 10 * log10(1 / mse.data[0])
+        psnr_low = 10 * log10(1 / mse_low.data[0])
+        avg_psnr += psnr
+        avg_psnr_low += psnr_low
+        if iteration < 5:
+            difference_LR = input - SR_low
+            difference_SR = target - SR
+            print(difference_LR)
+            print(difference_LR.shape)
+            df = pd.DataFrame(difference_LR)
+            df.to_csv('difference_LR' + str(iteration) + '.csv', header=False, index=False)
+            df2 = pd.DataFrame(difference_SR)
+            df2.to_csv('difference_SR' + str(iteration) + '.csv', header=False, index=False)
+        print(iteration)
+        print(psnr)
+        print(psnr_low)
+
+    print("===> Avg. SR PSNR: {:.4f} dB".format(avg_psnr / iteration))
+    print("===> Avg. LR PSNR: {:.4f} dB".format(avg_psnr_low / iteration))
+    print("===> Avg. Time: {:.4f} s".format(avg_time / iteration))

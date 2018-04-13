@@ -10,7 +10,7 @@ import cv2
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
 parser.add_argument("--cuda", action="store_true", help="use cuda?")
 parser.add_argument("--model", default="model/model_srresnet.pth", type=str, help="model path")
-parser.add_argument("--dataset", default="Set5", type=str, help="dataset name, Default: Set5")
+parser.add_argument("--dataset", default="LR", type=str, help="dataset name, Default: LR")
 parser.add_argument("--scale", default=4, type=int, help="scale factor, Default: 4")
 parser.add_argument("--gpus", default="0", type=str, help="gpu ids (default: 0)")
 
@@ -36,24 +36,18 @@ if cuda:
 
 model = torch.load(opt.model)["model"]
 
-image_list = glob.glob("./testsets/" + opt.dataset + "/*.*") 
+image_list = glob.glob('../test/' + opt.dataset + "/*.*")
 
 avg_psnr_predicted = 0.0
-avg_psnr_bicubic = 0.0
 avg_elapsed_time = 0.0
 
 for image_name in image_list:
     print("Processing ", image_name)
     im_gt_y = sio.loadmat(image_name)['im_gt_y']
-    im_b_y = sio.loadmat(image_name)['im_b_y']
     im_l = sio.loadmat(image_name)['im_l']
 
     im_gt_y = im_gt_y.astype(float)
-    im_b_y = im_b_y.astype(float)
     im_l = im_l.astype(float)
-
-    psnr_bicubic = PSNR(im_gt_y, im_b_y,shave_border=opt.scale)
-    avg_psnr_bicubic += psnr_bicubic
 
     im_input = im_l.astype(np.float32).transpose(2,0,1)
     im_input = im_input.reshape(1,im_input.shape[0],im_input.shape[1],im_input.shape[2])
@@ -89,5 +83,4 @@ for image_name in image_list:
 print("Scale=", opt.scale)
 print("Dataset=", opt.dataset)
 print("PSNR_predicted=", avg_psnr_predicted/len(image_list))
-print("PSNR_bicubic=", avg_psnr_bicubic/len(image_list))
 print("It takes average {}s for processing".format(avg_elapsed_time/len(image_list)))
