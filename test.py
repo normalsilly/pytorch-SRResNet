@@ -5,7 +5,7 @@ import numpy as np
 import time
 import math
 import pandas as pd
-import scipy
+import scipy.misc
 from math import log10
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
