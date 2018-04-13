@@ -29,7 +29,6 @@ def eval(test_gen, model, criterion, SR_dir):
     avg_psnr = 0
     avg_psnr_low = 0
     avg_time = 0
-    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR,再把SR降到（SR/4）'来比较
     for iteration, batch in enumerate(test_gen, 1):
         input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
         input_low = input_low.cuda()
