@@ -70,12 +70,14 @@ def eval(test_gen, model, criterion, SR_dir):
             difference_SR = difference_SR.cpu().data[0].numpy().astype(np.float32)
             print(difference_LR)
             print(difference_LR.shape)
-            df = pd.DataFrame(difference_LR)
-            df.to_csv('difference_LR' + str(iteration) + '.csv', header=False, index=False)
+            save_to_csv('difference_LR_0' + str(iteration) + '.csv', difference_LR[0])
+            save_to_csv('difference_LR_1' + str(iteration) + '.csv', difference_LR[1])
+            save_to_csv('difference_LR_2' + str(iteration) + '.csv', difference_LR[2])
             LR_size = difference_LR.shape
             difference_SR = scipy.misc.imresize(difference_SR, LR_size, interp='bicubic', mode=None)
-            df2 = pd.DataFrame(difference_SR)
-            df2.to_csv('difference_SR' + str(iteration) + '.csv', header=False, index=False)
+            save_to_csv('difference_SR_0' + str(iteration) + '.csv', difference_SR[0])
+            save_to_csv('difference_SR_1' + str(iteration) + '.csv', difference_SR[1])
+            save_to_csv('difference_SR_2' + str(iteration) + '.csv', difference_SR[2])
         print(iteration)
         print(psnr)
         print(psnr_low)
@@ -83,6 +85,11 @@ def eval(test_gen, model, criterion, SR_dir):
     print("===> Avg. SR PSNR: {:.4f} dB".format(avg_psnr / iteration))
     print("===> Avg. LR PSNR: {:.4f} dB".format(avg_psnr_low / iteration))
     print("===> Avg. Time: {:.4f} s".format(avg_time / iteration))
+
+
+def save_to_csv(filename, data):
+    df = pd.DataFrame(data)
+    df.to_csv(filename, header=False, index=False)
 
 
 def test(test_gen, model, criterion, SR_dir):
