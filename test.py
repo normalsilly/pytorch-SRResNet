@@ -24,6 +24,64 @@ parser.add_argument("--batchSize", type=int, default=16, help="testing batch siz
 parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 
 
+def eval(test_gen, model, criterion, SR_dir):
+    avg_psnr = 0
+    avg_psnr_low = 0
+    avg_time = 0
+    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR
+    # TODO:  再把SR降到（SR/4）'来比较
+    for iteration, batch in enumerate(test_gen, 1):
+        input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
+        input_low = input_low.cuda()
+        input = input.cuda()
+        target = target.cuda()
+
+        start = time.clock()
+        Blur_SR_low = model(input_low)
+        Blur_SR = model(input)
+
+        im_h = Blur_SR.cpu().data[0].numpy().astype(np.float32)
+        im_h[im_h < 0] = 0
+        im_h[im_h > 1.] = 1.
+
+        im_h_low = Blur_SR_low.cpu().data[0].numpy().astype(np.float32)
+        im_h_low[im_h_low < 0] = 0
+        im_h_low[im_h_low > 1.] = 1.
+        avg_time += (time.clock() - start)
+
+        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
+        SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
+
+        result = transforms.ToPILImage()(SR.cpu().data[0])
+        result_low = transforms.ToPILImage()(SR_low.cpu().data[0])
+        path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
+        path_low = join(SR_dir, '{0:04d}_RE_low.jpg'.format(iteration))
+        result.save(path)
+        result_low.save(path_low)
+        mse = criterion(SR, target)
+        mse_low = criterion(SR_low, input)
+        psnr = 10 * log10(1 / mse.data[0])
+        psnr_low = 10 * log10(1 / mse_low.data[0])
+        avg_psnr += psnr
+        avg_psnr_low += psnr_low
+        if iteration < 5:
+            difference_LR = input - SR_low
+            difference_SR = target - SR
+            print(difference_LR)
+            print(difference_LR.shape)
+            df = pd.DataFrame(difference_LR)
+            df.to_csv('difference_LR' + str(iteration) + '.csv', header=False, index=False)
+            df2 = pd.DataFrame(difference_SR)
+            df2.to_csv('difference_SR' + str(iteration) + '.csv', header=False, index=False)
+        print(iteration)
+        print(psnr)
+        print(psnr_low)
+
+    print("===> Avg. SR PSNR: {:.4f} dB".format(avg_psnr / iteration))
+    print("===> Avg. LR PSNR: {:.4f} dB".format(avg_psnr_low / iteration))
+    print("===> Avg. Time: {:.4f} s".format(avg_time / iteration))
+
+
 def test(test_gen, model, criterion, SR_dir):
     avg_psnr = 0
     avg_psnr2 = 0
@@ -86,63 +144,8 @@ if cuda:
     model = model.cuda()
     criterion = criterion.cuda()
 
-test(testloader, model, criterion, SR_dir)
+# test(testloader, model, criterion, SR_dir)
 
 eval(testloader, model, criterion, SR_dir)
 
-def eval(test_gen, model, criterion, SR_dir):
-    avg_psnr = 0
-    avg_psnr_low = 0
-    avg_time = 0
-    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR
-    # TODO:  再把SR降到（SR/4）'来比较
-    for iteration, batch in enumerate(test_gen, 1):
-        input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
-        input_low = input_low.cuda()
-        input = input.cuda()
-        target = target.cuda()
 
-        start = time.clock()
-        Blur_SR_low = model(input_low)
-        Blur_SR = model(input)
-
-        im_h = Blur_SR.cpu().data[0].numpy().astype(np.float32)
-        im_h[im_h < 0] = 0
-        im_h[im_h > 1.] = 1.
-
-        im_h_low = Blur_SR_low.cpu().data[0].numpy().astype(np.float32)
-        im_h_low[im_h_low < 0] = 0
-        im_h_low[im_h_low > 1.] = 1.
-        avg_time += (time.clock() - start)
-
-        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
-        SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
-
-        result = transforms.ToPILImage()(SR.cpu().data[0])
-        result_low = transforms.ToPILImage()(SR_low.cpu().data[0])
-        path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
-        path_low = join(SR_dir, '{0:04d}_RE_low.jpg'.format(iteration))
-        result.save(path)
-        result_low.save(path_low)
-        mse = criterion(SR, target)
-        mse_low = criterion(SR_low, input)
-        psnr = 10 * log10(1 / mse.data[0])
-        psnr_low = 10 * log10(1 / mse_low.data[0])
-        avg_psnr += psnr
-        avg_psnr_low += psnr_low
-        if iteration < 5:
-            difference_LR = input - SR_low
-            difference_SR = target - SR
-            print(difference_LR)
-            print(difference_LR.shape)
-            df = pd.DataFrame(difference_LR)
-            df.to_csv('difference_LR' + str(iteration) + '.csv', header=False, index=False)
-            df2 = pd.DataFrame(difference_SR)
-            df2.to_csv('difference_SR' + str(iteration) + '.csv', header=False, index=False)
-        print(iteration)
-        print(psnr)
-        print(psnr_low)
-
-    print("===> Avg. SR PSNR: {:.4f} dB".format(avg_psnr / iteration))
-    print("===> Avg. LR PSNR: {:.4f} dB".format(avg_psnr_low / iteration))
-    print("===> Avg. Time: {:.4f} s".format(avg_time / iteration))
