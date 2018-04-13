@@ -65,7 +65,9 @@ def eval(test_gen, model, criterion, SR_dir):
         avg_psnr_low += psnr_low
         if iteration < 5:
             difference_LR = input - SR_low
+            difference_LR = difference_LR.cpu().data[0].numpy().astype(np.float32)
             difference_SR = target - SR
+            difference_SR = difference_SR.cpu().data[0].numpy().astype(np.float32)
             print(difference_LR)
             print(difference_LR.shape)
             df = pd.DataFrame(difference_LR)
