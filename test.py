@@ -5,6 +5,7 @@ import numpy as np
 import time
 import math
 import pandas as pd
+import scipy
 from math import log10
 from torch.utils.data import DataLoader
 from torch.autograd import Variable
@@ -28,8 +29,7 @@ def eval(test_gen, model, criterion, SR_dir):
     avg_psnr = 0
     avg_psnr_low = 0
     avg_time = 0
-    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR
-    # TODO:  再把SR降到（SR/4）'来比较
+    # Have done: matlab 弄个出LR/4的, 然后改Loader, 这里读LR/4和L4,变成SR/4和SR,再把SR降到（SR/4）'来比较
     for iteration, batch in enumerate(test_gen, 1):
         input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
         input_low = input_low.cuda()
@@ -71,6 +71,8 @@ def eval(test_gen, model, criterion, SR_dir):
             print(difference_LR.shape)
             df = pd.DataFrame(difference_LR)
             df.to_csv('difference_LR' + str(iteration) + '.csv', header=False, index=False)
+            LR_size = difference_LR.shape
+            difference_SR = scipy.misc.imresize(difference_SR, LR_size, interp='bicubic', mode=None)
             df2 = pd.DataFrame(difference_SR)
             df2.to_csv('difference_SR' + str(iteration) + '.csv', header=False, index=False)
         print(iteration)
