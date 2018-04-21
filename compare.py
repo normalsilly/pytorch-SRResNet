@@ -13,7 +13,7 @@ from dataset import DataValSet_test
 from torchvision import transforms
 from os.path import join
 from srresnet import _NetC
-
+from pdb import set_trace
 
 DATA_LIST_PATH = '../test/val.txt'
 
@@ -29,6 +29,7 @@ parser.add_argument("--resume", default="", type=str, help="Path to checkpoint (
 
 def eval(test_gen, model, criterion, SR_dir):
     avg_time = 0
+    set_trace()
     for iteration, batch in enumerate(test_gen, 1):
         input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
         input_low = input_low.cuda()

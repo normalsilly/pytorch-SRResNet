@@ -2,6 +2,7 @@ import torch.utils.data as data
 import torch
 import h5py
 import numpy as np
+import random
 
 from os import listdir
 from os.path import join
@@ -21,6 +22,30 @@ class DatasetFromHdf5(data.Dataset):
 
     def __getitem__(self, index):
         return torch.from_numpy(self.data[index,:,:,:]).float(), torch.from_numpy(self.target[index,:,:,:]).float()
+
+    # def __getitem__(self, index):
+    #     # randomly flip
+    #     # print(index)
+    #     # data shppe: C*H*W
+    #     LR_patch = self.data[index, :, :, :]
+    #     HR_patch = self.target[index, :, :, :]
+    #     LR_patch = np.clip(LR_patch, 0,
+    #                        1)  # we might get out of bounds due to noise
+    #     HR_patch = np.clip(HR_patch, 0,
+    #                        1)  # we might get out of bounds due to noise
+    #     LR_patch = np.asarray(LR_patch, np.float32)
+    #     HR_patch = np.asarray(HR_patch, np.float32)
+    #
+    #     flip_channel = random.randint(0, 1)
+    #     if flip_channel != 0:
+    #         LR_patch = np.flip(LR_patch, 2)
+    #         HR_patch = np.flip(HR_patch, 2)
+    #     # randomly rotation
+    #     rotation_degree = random.randint(0, 3)
+    #     LR_patch = np.rot90(LR_patch, rotation_degree, (1, 2))
+    #     HR_patch = np.rot90(HR_patch, rotation_degree, (1, 2))
+    #     return LR_patch.copy(), \
+    #            HR_patch.copy()
 
     def __len__(self):
         return self.data.shape[0]
