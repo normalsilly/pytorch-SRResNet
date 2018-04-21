@@ -68,7 +68,7 @@ class _NetG(nn.Module):
 
 class _NetC(nn.Module):
     def __init__(self):
-        super(_NetG, self).__init__()
+        super(_NetC, self).__init__()
 
         self.conv_input = nn.Conv2d(in_channels=3, out_channels=64,
                                     kernel_size=9, stride=1, padding=4,
