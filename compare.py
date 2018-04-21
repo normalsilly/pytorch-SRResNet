@@ -91,7 +91,7 @@ if cuda:
 
 print("===> Loading datasets")
 root_val_dir = '../test/'
-SR_dir = join(root_val_dir, 'Results')
+SR_dir = join(root_val_dir, 'Compare_Results')
 if os.path.isdir(SR_dir):
     pass
 else:
