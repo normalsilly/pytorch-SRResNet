@@ -22,14 +22,14 @@ parser.add_argument("--cuda", action="store_true", help="use cuda?")
 parser.add_argument("--model", default="model/model_srresnet.pth", type=str, help="model path")
 parser.add_argument("--scale", default=4, type=int, help="scale factor, Default: 4")
 parser.add_argument("--gpus", default="0", type=str, help="gpu ids (default: 0)")
-parser.add_argument("--batchSize", type=int, default=16, help="testing batch size")
+parser.add_argument("--batchSize", type=int, default=1, help="testing batch size")
 parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 parser.add_argument("--resume", default="", type=str, help="Path to checkpoint (default: none)")
 
 
 def eval(test_gen, model, criterion, SR_dir):
     avg_time = 0
-    set_trace()
+    # set_trace()
     for iteration, batch in enumerate(test_gen, 1):
         input_low, input, target = Variable(batch[0], volatile=True), Variable(batch[1], volatile=True), Variable(batch[2], volatile=True)
         input_low = input_low.cuda()
