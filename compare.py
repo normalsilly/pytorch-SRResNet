@@ -55,6 +55,7 @@ def eval(test_gen, model, criterion, SR_dir):
         result.save(path)
         result_low.save(path_low)
         if iteration < 5:
+            set_trace()
             difference_LR = input - SR_low
             difference_LR = difference_LR.cpu().data[0].numpy().astype(np.float32)
             difference_SR = target - SR
