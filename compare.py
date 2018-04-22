@@ -46,8 +46,9 @@ def eval(test_gen, model, criterion, SR_dir):
         im_h_low = Blur_SR_low.cpu().data[0].numpy().astype(np.float32)
         avg_time += (time.clock() - start)
 
-        SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
-        SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
+        print(im_h.shape)
+        # SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
+        # SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
         # set_trace()
         df = pd.DataFrame(im_h)
         df_low = pd.DataFrame(im_h_low)

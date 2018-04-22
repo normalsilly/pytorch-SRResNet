@@ -116,7 +116,7 @@ class _NetC(nn.Module):
         out = self.residual(out)
         out = self.bn_mid(self.conv_mid(out))
         out = torch.add(out, residual)
-        out = self.upscale4x(out)
+        # out = self.upscale4x(out)
         # out = self.conv_output(out)
         return out
 
