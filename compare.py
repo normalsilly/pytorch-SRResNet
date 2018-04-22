@@ -48,9 +48,9 @@ def eval(test_gen, model, criterion, SR_dir):
 
         SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
         SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
-
-        df = pd.DataFrame(SR)
-        df_low = pd.DataFrame(SR_low)
+        set_trace()
+        df = pd.DataFrame(im_h)
+        df_low = pd.DataFrame(im_h_low)
 
         path = join(SR_dir, '{0:04d}_RE.csv'.format(iteration))
         path_low = join(SR_dir, 'low_{0:04d}_RE.csv'.format(iteration))
