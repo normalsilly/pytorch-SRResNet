@@ -47,6 +47,7 @@ def eval(test_gen, model, criterion, SR_dir):
         avg_time += (time.clock() - start)
 
         print(im_h.shape)
+        print(im_h_low.shape)
         # SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
         # SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
         # set_trace()
