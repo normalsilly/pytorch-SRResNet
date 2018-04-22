@@ -14,6 +14,7 @@ from torchvision import transforms
 from os.path import join
 from srresnet import _NetC
 from pdb import set_trace
+import pandas as pd
 
 DATA_LIST_PATH = '../test/val.txt'
 
@@ -48,31 +49,14 @@ def eval(test_gen, model, criterion, SR_dir):
         SR = Variable((torch.from_numpy(im_h)).unsqueeze(0)).cuda()
         SR_low = Variable((torch.from_numpy(im_h_low)).unsqueeze(0)).cuda()
 
-        result = transforms.ToPILImage()(SR.cpu().data[0])
-        result_low = transforms.ToPILImage()(SR_low.cpu().data[0])
-        path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
-        path_low = join(SR_dir, 'low_{0:04d}_RE.jpg'.format(iteration))
-        result.save(path)
-        result_low.save(path_low)
-        if iteration < 5:
-            set_trace()
-            difference_LR = input - SR_low
-            difference_LR = difference_LR.cpu().data[0].numpy().astype(np.float32)
-            difference_SR = target - SR
-            difference_SR = difference_SR.cpu().data[0].numpy().astype(np.float32)
-            print(difference_LR)
-            print(difference_LR.shape)
-            save_to_csv('difference_LR_' + str(iteration) + '_0.csv', difference_LR[0])
-            save_to_csv('difference_LR_' + str(iteration) + '_1.csv', difference_LR[1])
-            save_to_csv('difference_LR_' + str(iteration) + '_2.csv', difference_LR[2])
-            LR_size = difference_LR.shape
-            difference_SR = scipy.misc.imresize(difference_SR, LR_size, interp='bicubic', mode=None)
-            print('difference_SR')
-            print(difference_SR.shape)
-            print(difference_SR)
-            save_to_csv('difference_SR_' + str(iteration) + '_0.csv', difference_SR[0])
-            save_to_csv('difference_SR_' + str(iteration) + '_1.csv', difference_SR[1])
-            save_to_csv('difference_SR_' + str(iteration) + '_2.csv', difference_SR[2])
+        df = pd.DataFrame(SR)
+        df_low = pd.DataFrame(SR_low)
+
+        path = join(SR_dir, '{0:04d}_RE.csv'.format(iteration))
+        path_low = join(SR_dir, 'low_{0:04d}_RE.csv'.format(iteration))
+        df.to_csv(path, header=False, index=False)
+        df_low.to_csv(path_low, header=False, index=False)
+        print(path)
 
 
     print("===> Avg. Time: {:.4f} s".format(avg_time / iteration))
