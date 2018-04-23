@@ -55,8 +55,15 @@ def eval(test_gen, model, criterion, SR_dir):
         result_low = transforms.ToPILImage()(SR_low.cpu().data[0])
         path = join(SR_dir, '{0:04d}_RE.jpg'.format(iteration))
         path_low = join(SR_dir, '{0:04d}_RE_low.jpg'.format(iteration))
+
+        p = join('../test/', 'Origin')
+        p1 = join(p, 'LR/{0:04d}.jpg'.format(iteration))
+        p2 = join(p, 'HR/{0:04d}.jpg'.format(iteration))
+        input.save(p1)
+        target.save(p2)
         result.save(path)
         result_low.save(path_low)
+
         mse = criterion(SR, target)
         mse_low = criterion(SR_low, input)
         psnr = 10 * log10(1 / mse.data[0])
