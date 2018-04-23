@@ -21,7 +21,7 @@ parser.add_argument("--cuda", action="store_true", help="use cuda?")
 parser.add_argument("--model", default="model/model_srresnet.pth", type=str, help="model path")
 parser.add_argument("--scale", default=4, type=int, help="scale factor, Default: 4")
 parser.add_argument("--gpus", default="0", type=str, help="gpu ids (default: 0)")
-parser.add_argument("--batchSize", type=int, default=16, help="testing batch size")
+parser.add_argument("--batchSize", type=int, default=1, help="testing batch size")
 parser.add_argument('--threads', type=int, default=4, help='number of threads for data loader to use')
 
 
@@ -59,8 +59,10 @@ def eval(test_gen, model, criterion, SR_dir):
         p = join('../test/', 'Origin')
         p1 = join(p, 'LR/{0:04d}.jpg'.format(iteration))
         p2 = join(p, 'HR/{0:04d}.jpg'.format(iteration))
-        input.save(p1)
-        target.save(p2)
+        originLR = transforms.ToPILImage()(input.cpu().data[0])
+        originHR = transforms.ToPILImage()(target.cpu().data[0])
+        originLR.save(p1)
+        originHR.save(p2)
         result.save(path)
         result_low.save(path_low)
 
