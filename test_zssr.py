@@ -74,8 +74,8 @@ for img_id, image_name in enumerate(image_list, 1):
     if img_id in n:
         print('jump over')
         continue
-    im_gt_y = sio.loadmat(image_name)['im_gt_y']
-    im_l = sio.loadmat(image_name)['im_l']
+    im_gt_y = sio.loadmat(image_name)['label']
+    im_l = sio.loadmat(image_name)['data']
 
     im_gt_y = im_gt_y.astype(float)
     im_l = im_l.astype(float)
