@@ -1,4 +1,5 @@
-import matlab.engine
+#import matlab.engine
+import matlab
 import argparse, os
 import torch
 import numpy as np
@@ -43,7 +44,7 @@ def PSNR(pred, gt, shave_border=0):
 
 opt = parser.parse_args()
 cuda = opt.cuda
-eng = matlab.engine.start_matlab()
+#eng = matlab.engine.start_matlab()
 
 with open('n.txt', 'r') as f:
     tmp_n = f.readlines()
@@ -121,7 +122,8 @@ for img_id, image_name in enumerate(image_list, 1):
     im_h = im_h.transpose(1,2,0).astype(np.float32)
 
     im_h_matlab = matlab.double((im_h / 255.).tolist())
-    im_h_ycbcr = eng.rgb2ycbcr(im_h_matlab)
+    #im_h_ycbcr = eng.rgb2ycbcr(im_h_matlab)
+    im_h_ycbcr = im_h_matlab
     im_h_ycbcr = np.array(im_h_ycbcr._data).reshape(im_h_ycbcr.size, order='F').astype(np.float32) * 255.
     im_h_y = im_h_ycbcr[:,:,0]
 
@@ -140,7 +142,8 @@ for img_id, image_name in enumerate(image_list, 1):
     im_h_new = im_h_new.transpose(1, 2, 0).astype(np.float32)
 
     im_h_matlab_new = matlab.double((im_h_new / 255.).tolist())
-    im_h_ycbcr_new = eng.rgb2ycbcr(im_h_matlab_new)
+    #im_h_ycbcr_new = eng.rgb2ycbcr(im_h_matlab_new)
+    im_h_ycbcr_new = im_h_matlab_new
     im_h_ycbcr_new = np.array(im_h_ycbcr_new._data).reshape(im_h_ycbcr_new.size,
                                                     order='F').astype(
         np.float32) * 255.
