@@ -63,6 +63,7 @@ if cuda:
 origin_model = torch.load(opt.model)["model"]
 
 image_list = glob.glob('../test/' + opt.dataset + "/*.*")
+image_list = sorted(image_list)
 
 avg_psnr_predicted = 0.0
 avg_psnr_predicted_new = 0.0
