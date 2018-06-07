@@ -79,10 +79,10 @@ def train(training_data_loader, optimizer, model, criterion):
         loss.backward()
 
         optimizer.step()
-        print(
-            "===> Epoch[{}]({}/{}): Loss: {:.5} Content_loss {:.5}".format(
-                lr, iteration, len(training_data_loader), loss.data[0],
-                content_loss.data[0]))
+        print("===> lr[{}]({}/{}): Loss: {:.5}".format(lr, iteration,
+                                                          len(
+                                                              training_data_loader),
+                                                          loss.data[0]))
 
 def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model):
     avg_psnr = 0
