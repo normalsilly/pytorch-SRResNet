@@ -160,7 +160,7 @@ for img_id, image_name in enumerate(image_list, 1):
             netContent = netContent.cuda()
 
     print("===> Loading datasets")
-    filename = "../train/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
+    filename = "../test/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
     train_set = DatasetFromHdf5(filename)
     training_data_loader = DataLoader(dataset=train_set,
                                       num_workers=opt.threads, \
