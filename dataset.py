@@ -90,3 +90,34 @@ class DataValSet_test(data.Dataset):
         HR_image = np.asarray(HR_image, np.float32)
         HR_image /= 255
         return LLR_image.copy(), LR_image.copy(), HR_image.copy()
+
+# TODO: check image_name
+class DataValSet_zssr(data.Dataset):
+    def __init__(self, root, image_name, mean=(128, 128, 128)):
+        self.root = root
+        self.mean = mean
+
+        self.files = []
+        LR_file = join(self.root, "LR/%s.png" % image_name)
+        HR_file = join(self.root, "HR/%s.png" % image_name)
+        self.files.append({
+            "lr": LR_file,
+            "hr": HR_file
+        })
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, index):
+        datafiles = self.files[index]
+
+        LR_image = imread(datafiles["lr"])
+        LR_image = LR_image.transpose((2, 0, 1))
+        LR_image = np.asarray(LR_image, np.float32)
+        LR_image /= 255
+
+        HR_image = imread(datafiles["hr"])
+        HR_image = HR_image.transpose((2, 0, 1))
+        HR_image = np.asarray(HR_image, np.float32)
+        HR_image /= 255
+        return LR_image.copy(), HR_image.copy()
