@@ -35,13 +35,20 @@ parser.add_argument("--vgg_loss", action="store_true", help="Use content loss?")
 parser.add_argument("--lr", type=float, default=1e-4, help="Learning Rate. Default=1e-4")
 parser.add_argument("--batchSize", type=int, default=1, help="testing batch size")
 parser.add_argument("--threads", type=int, default=0, help="Number of threads for data loader to use, Default: 1")
+parser.add_argument("--step", type=int, default=200, help="Sets the learning rate to the initial LR decayed by momentum every n epochs, Default: n=500")
+
+def adjust_learning_rate(optimizer, epoch):
+    """Sets the learning rate to the initial LR decayed by 10"""
+    lr = opt.lr * (0.1 ** (epoch // opt.step))
+    return lr
 
 
 # TODO: update lr
 def train(training_data_loader, optimizer, model, criterion):
+    lr = adjust_learning_rate(optimizer, 1)
 
     for param_group in optimizer.param_groups:
-        param_group["lr"] = lr
+        param_group["lr"] = 1e-4
 
     model.train()
 
