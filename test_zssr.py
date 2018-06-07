@@ -100,9 +100,9 @@ def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
 
         result = transforms.ToPILImage()(SR.cpu().data[0])
         if is_origin_model:
-            path = join(SR_dir, '{0:04d}_origin.jpg'.format(id))
+            path = join(SR_dir, '{}_origin.jpg'.format(id))
         else:
-            path = join(SR_dir, '{0:04d}_new.jpg'.format(id))
+            path = join(SR_dir, '{}_new.jpg'.format(id))
         result.save(path)
         mse = criterion(SR, target)
         psnr = 10 * log10(1 / mse.data[0])
