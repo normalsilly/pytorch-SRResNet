@@ -153,7 +153,7 @@ for img_id, image_name in enumerate(image_list, 1):
         continue
     # since image_name is '../test/LR/804.png'
     testloader = DataLoader(
-        DataValSet_zssr('../test/' + opt.dataset + '/', image_name[-7:-4]),
+        DataValSet_zssr('../test/', image_name[-7:-4]),
         batch_size=opt.batchSize, shuffle=False, pin_memory=False)
 
     if cuda:
