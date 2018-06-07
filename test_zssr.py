@@ -180,8 +180,8 @@ for img_id, image_name in enumerate(image_list, 1):
     print("===> Setting Optimizer")
     optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
-    print("===> Training")
-    train(training_data_loader, optimizer, model, criterion)
+    #print("===> Training")
+    #train(training_data_loader, optimizer, model, criterion)
 
     print("===> Testing")
     log_file.write(image_name + '\n')
