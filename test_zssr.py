@@ -48,7 +48,7 @@ def train(training_data_loader, optimizer, model, criterion):
     lr = adjust_learning_rate(optimizer, 1)
 
     for param_group in optimizer.param_groups:
-        param_group["lr"] = 1e-4
+        param_group["lr"] = 1e-3
 
     model.train()
 
@@ -184,8 +184,8 @@ for img_id, image_name in enumerate(image_list, 1):
 
     print("===> Testing")
     log_file.write(image_name + '\n')
-    test(testloader, model, criterion, '../test/zssr/', log_file, True)
-    test(testloader, origin_model, criterion, '../test/zssr/', log_file, False)
+    test(testloader, model, criterion, '../test/zssr/', log_file, False)
+    test(testloader, origin_model, criterion, '../test/zssr/', log_file, True)
 
 print("origin model PSNR_predicted=", avg_psnr_predicted/len(image_list))
 print("new model PSNR_predicted=", avg_psnr_predicted_new/len(image_list))
