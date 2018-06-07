@@ -34,6 +34,7 @@ parser.add_argument("--gpus", default="0", type=str, help="gpu ids (default: 0)"
 parser.add_argument("--vgg_loss", action="store_true", help="Use content loss?")
 parser.add_argument("--lr", type=float, default=1e-4, help="Learning Rate. Default=1e-4")
 parser.add_argument("--batchSize", type=int, default=1, help="testing batch size")
+parser.add_argument("--threads", type=int, default=0, help="Number of threads for data loader to use, Default: 1")
 
 
 # TODO: update lr
