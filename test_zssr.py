@@ -82,7 +82,7 @@ def train(training_data_loader, optimizer, model, criterion):
         #print("===> lr[{}]({}/{}): Loss: {:.5}".format(lr, iteration,len(training_data_loader), loss.data[0]))
 
 
-def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model):
+def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
     avg_psnr = 0
 
     for iteration, batch in enumerate(test_gen, 1):
@@ -100,14 +100,14 @@ def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model):
 
         result = transforms.ToPILImage()(SR.cpu().data[0])
         if is_origin_model:
-            path = join(SR_dir, '{0:04d}_origin.jpg'.format(iteration))
+            path = join(SR_dir, '{0:04d}_origin.jpg'.format(id))
         else:
-            path = join(SR_dir, '{0:04d}_new.jpg'.format(iteration))
+            path = join(SR_dir, '{0:04d}_new.jpg'.format(id))
         result.save(path)
         mse = criterion(SR, target)
         psnr = 10 * log10(1 / mse.data[0])
         avg_psnr += psnr
-        # print(iteration)
+        print('iter:' + str(iteration))
         # print(psnr)
 
     if is_origin_model:
@@ -180,13 +180,17 @@ for img_id, image_name in enumerate(image_list, 1):
     print("===> Setting Optimizer")
     optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
-    #print("===> Training")
-    #train(training_data_loader, optimizer, model, criterion)
+    print("===> Testing")
+    log_file.write(image_name + '\n')
+    test(testloader, origin_model, criterion, '../test/zssr/', log_file, True, image_name[-7:-4])
+
+    print("===> Training")
+    train(training_data_loader, optimizer, model, criterion)
 
     print("===> Testing")
     log_file.write(image_name + '\n')
-    test(testloader, model, criterion, '../test/zssr/', log_file, False)
-    test(testloader, origin_model, criterion, '../test/zssr/', log_file, True)
+    test(testloader, model, criterion, '../test/zssr/', log_file, False, image_name[-7:-4])
 
-print("origin model PSNR_predicted=", avg_psnr_predicted/len(image_list))
-print("new model PSNR_predicted=", avg_psnr_predicted_new/len(image_list))
+
+# print("origin model PSNR_predicted=", avg_psnr_predicted/len(image_list))
+# print("new model PSNR_predicted=", avg_psnr_predicted_new/len(image_list))
