@@ -96,7 +96,6 @@ class DataValSet_zssr(data.Dataset):
     def __init__(self, root, image_name, mean=(128, 128, 128)):
         self.root = root
         self.mean = mean
-
         self.files = []
         LR_file = join(self.root, "LR/%s.png" % image_name)
         HR_file = join(self.root, "HR/%s.png" % image_name)
