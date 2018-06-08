@@ -23,7 +23,7 @@ from dataset import DataValSet_zssr
 from torchvision import transforms
 from os.path import join
 from math import log10
-
+import pandas as pd
 
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
 parser.add_argument("--cuda", action="store_true", help="use cuda?")
@@ -42,13 +42,16 @@ def adjust_learning_rate(optimizer, epoch):
     lr = opt.lr * (0.1 ** (epoch // opt.step))
     return lr
 
+def save_to_csv(filename, data):
+    df = pd.DataFrame(data)
+    df.to_csv(filename, header=False, index=False)
 
 # TODO: update lr
 def train(training_data_loader, optimizer, model, criterion):
     lr = adjust_learning_rate(optimizer, 1)
 
     for param_group in optimizer.param_groups:
-        param_group["lr"] = 1e-3
+        param_group["lr"] = 1e-4
 
     model.train()
 
@@ -108,7 +111,11 @@ def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
         psnr = 10 * log10(1 / mse.data[0])
         avg_psnr += psnr
         print('iter:' + str(iteration))
-        # print(psnr)
+        print('MSE:' + str(mse.data[0]))
+        if is_origin_model:
+            save_to_csv(join(SR_dir, '{}_origin.csv'.format(id)), (SR-target)[0])
+        else:
+            save_to_csv(join(SR_dir, '{}_new.csv'.format(id)), (SR-target)[0])
 
     if is_origin_model:
         log_file.write(
