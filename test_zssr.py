@@ -36,6 +36,8 @@ parser.add_argument("--lr", type=float, default=1e-4, help="Learning Rate. Defau
 parser.add_argument("--batchSize", type=int, default=1, help="testing batch size")
 parser.add_argument("--threads", type=int, default=0, help="Number of threads for data loader to use, Default: 1")
 parser.add_argument("--step", type=int, default=200, help="Sets the learning rate to the initial LR decayed by momentum every n epochs, Default: n=500")
+parser.add_argument("--nEpochs", type=int, default=200, help="number of epochs to train for")
+
 
 def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10"""
@@ -47,11 +49,11 @@ def save_to_csv(filename, data):
     df.to_csv(filename, header=False, index=False)
 
 # TODO: update lr
-def train(training_data_loader, optimizer, model, criterion):
-    lr = adjust_learning_rate(optimizer, 1)
+def train(training_data_loader, optimizer, model, criterion, epoch):
+    lr = adjust_learning_rate(optimizer, epoch-1)
 
     for param_group in optimizer.param_groups:
-        param_group["lr"] = 1e-4
+        param_group["lr"] = lr
 
     model.train()
 
@@ -82,7 +84,7 @@ def train(training_data_loader, optimizer, model, criterion):
         loss.backward()
 
         optimizer.step()
-        #print("===> lr[{}]({}/{}): Loss: {:.5}".format(lr, iteration,len(training_data_loader), loss.data[0]))
+        print("===> lr[{}]({}/{}): Loss: {:.5}".format(lr, iteration,len(training_data_loader), loss.data[0]))
 
 
 def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
@@ -149,9 +151,8 @@ origin_model = torch.load(opt.model)["model"]
 image_list = glob.glob('../test/' + opt.dataset + "/*.*")
 image_list = sorted(image_list)
 
-avg_psnr_predicted = 0.0
-avg_psnr_predicted_new = 0.0
-avg_elapsed_time = 0.0
+# avg_psnr_predicted = 0.0
+# avg_psnr_predicted_new = 0.0
 
 
 for img_id, image_name in enumerate(image_list, 1):
@@ -170,7 +171,7 @@ for img_id, image_name in enumerate(image_list, 1):
         model = origin_model.cpu()
 
     # TODO: update model
-    criterion = nn.MSELoss(size_average=False)
+    criterion = nn.MSELoss(size_average=True)
     if cuda:
         criterion = criterion.cuda()
         if opt.vgg_loss:
@@ -192,7 +193,8 @@ for img_id, image_name in enumerate(image_list, 1):
     test(testloader, origin_model, criterion, '../test/zssr/', log_file, True, image_name[-7:-4])
 
     print("===> Training")
-    train(training_data_loader, optimizer, model, criterion)
+    for epoch in range(1, opt.nEpochs + 1):
+        train(training_data_loader, optimizer, model, criterion, epoch)
 
     print("===> Testing")
     log_file.write(image_name + '\n')
