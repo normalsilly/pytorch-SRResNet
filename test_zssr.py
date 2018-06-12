@@ -114,10 +114,10 @@ def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
         avg_psnr += psnr
         print('iter:' + str(iteration))
         print('MSE:' + str(mse.data[0]))
-        if is_origin_model:
-            save_to_csv(join(SR_dir, '{}_origin.csv'.format(id)), (SR-target)[0])
-        else:
-            save_to_csv(join(SR_dir, '{}_new.csv'.format(id)), (SR-target)[0])
+        # if is_origin_model:
+        #     save_to_csv(join(SR_dir, '{}_origin.csv'.format(id)), (SR-target)[0])
+        # else:
+        #     save_to_csv(join(SR_dir, '{}_new.csv'.format(id)), (SR-target)[0])
 
     if is_origin_model:
         log_file.write(
