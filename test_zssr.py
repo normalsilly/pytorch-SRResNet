@@ -84,7 +84,7 @@ def train(training_data_loader, optimizer, model, criterion, epoch):
         loss.backward()
 
         optimizer.step()
-        print("===> lr[{}]({}/{}): Loss: {:.5}".format(lr, iteration,len(training_data_loader), loss.data[0]))
+    print("===> epoch[{}]: Loss: {:.5}".format(epoch, loss.data[0]))
 
 
 def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
