@@ -3,6 +3,7 @@ import torch
 import h5py
 import numpy as np
 import random
+import os
 
 from os import listdir
 from os.path import join
@@ -120,3 +121,42 @@ class DataValSet_zssr(data.Dataset):
         HR_image = np.asarray(HR_image, np.float32)
         HR_image /= 255
         return LR_image.copy(), HR_image.copy()
+
+class DataValSet_zssr_train(data.Dataset):
+    def __init__(self, root, image_name):
+        super(DataValSet_zssr_train, self).__init__()
+        self.root = root
+        self.input_dir = os.path.join(self.root, image_name, 'input_4x')
+        self.target_dir = os.path.join(self.root, image_name, 'target')
+
+        # for split in ["train", "trainval", "val"]:
+        self.input_ids = [x for x in sorted(os.listdir(self.input_dir)) if is_image_file(x)]
+
+    def __getitem__(self, index):
+        # randomly flip
+        #print(index)
+        #data shppe: C*H*W
+        name = self.input_ids[index]
+        input_image = imread(os.path.join(self.input_dir, "%s" % name))
+        input_image = input_image.transpose((2, 0, 1))
+        input_image = np.asarray(input_image, np.float32)
+        input_image /= 255
+
+        target_image = imread(os.path.join(self.target_dir, "%s" % name))
+        target_image = target_image.transpose((2, 0, 1))
+        target_image = np.asarray(target_image, np.float32)
+        target_image /= 255
+
+        flip_channel = random.randint(0, 1)
+        if flip_channel != 0:
+            input_image = np.flip(input_image, 2)
+            target_image = np.flip(target_image, 2)
+        # randomly rotation
+        rotation_degree = random.randint(0, 3)
+        input_image = np.rot90(input_image, rotation_degree, (1,2))
+        target_image = np.rot90(target_image, rotation_degree, (1,2))
+        return input_image.copy(), \
+               target_image.copy()
+
+    def __len__(self):
+        return len(self.input_ids)

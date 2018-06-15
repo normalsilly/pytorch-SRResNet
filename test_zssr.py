@@ -19,7 +19,7 @@ from dataset import DatasetFromHdf5
 from torchvision import models
 from random import shuffle
 import torch.utils.model_zoo as model_zoo
-from dataset import DataValSet_zssr
+from dataset import DataValSet_zssr, DataValSet_zssr_train
 from torchvision import transforms
 from os.path import join
 from math import log10
@@ -127,18 +127,11 @@ def test(test_gen, model, criterion, SR_dir, log_file, is_origin_model, id):
         log_file.write(
             "new model PSNR_predicted=" + str(avg_psnr / iteration) + '\n')
         print("new model PSNR_predicted=" + str(avg_psnr / iteration) + '\n')
+    return avg_psnr / iteration
 
 
 opt = parser.parse_args()
 cuda = opt.cuda
-
-with open('n.txt', 'r') as f:
-    tmp_n = f.readlines()
-n = []
-for i in tmp_n:
-    n.append(int(i[:-1]))
-
-log_file = open('log.txt', "w")
 
 if cuda:
     print("=> use gpu id: '{}'".format(opt.gpus))
@@ -151,15 +144,13 @@ origin_model = torch.load(opt.model)["model"]
 image_list = glob.glob('../test/' + opt.dataset + "/*.*")
 image_list = sorted(image_list)
 
-# avg_psnr_predicted = 0.0
-# avg_psnr_predicted_new = 0.0
+avg_psnr_origin = 0.0
+avg_psnr_new = 0.0
 
 
 for img_id, image_name in enumerate(image_list, 1):
+    log_file = open('log.txt', "a")
     print("Processing ", image_name)
-    if img_id in n:
-        print('jump over')
-        continue
     # since image_name is '../test/LR/804.png'
     testloader = DataLoader(
         DataValSet_zssr('../test/', image_name[-7:-4]),
@@ -178,9 +169,9 @@ for img_id, image_name in enumerate(image_list, 1):
             netContent = netContent.cuda()
 
     print("===> Loading datasets")
-    filename = "../test/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
-    train_set = DatasetFromHdf5(filename)
-    training_data_loader = DataLoader(dataset=train_set,
+    # filename = "../test/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
+    # train_set = DatasetFromHdf5(filename)
+    training_data_loader = DataLoader(DataValSet_zssr_train('../test/DIV2K_valid_LLR', image_name[-7:-4]),
                                       num_workers=opt.threads, \
                                       batch_size=opt.batchSize,
                                       shuffle=True)
@@ -190,7 +181,7 @@ for img_id, image_name in enumerate(image_list, 1):
 
     print("===> Testing")
     log_file.write(image_name + '\n')
-    test(testloader, origin_model, criterion, '../test/zssr/', log_file, True, image_name[-7:-4])
+    avg_psnr_origin += test(testloader, origin_model, criterion, '../test/zssr/', log_file, True, image_name[-7:-4])
 
     print("===> Training")
     for epoch in range(1, opt.nEpochs + 1):
@@ -198,8 +189,15 @@ for img_id, image_name in enumerate(image_list, 1):
 
     print("===> Testing")
     log_file.write(image_name + '\n')
-    test(testloader, model, criterion, '../test/zssr/', log_file, False, image_name[-7:-4])
+    avg_psnr_new += test(testloader, model, criterion, '../test/zssr/', log_file, False, image_name[-7:-4])
+    log_file.close()
 
+avg_psnr_origin = avg_psnr_origin / len(image_list)
+avg_psnr_new = avg_psnr_new / len(image_list)
 
-# print("origin model PSNR_predicted=", avg_psnr_predicted/len(image_list))
-# print("new model PSNR_predicted=", avg_psnr_predicted_new/len(image_list))
+print("origin model PSNR_predicted=", avg_psnr_origin)
+print("new model PSNR_predicted=", avg_psnr_new)
+log_file = open('log.txt', "a")
+log_file.write("origin model PSNR_predicted=" + str(avg_psnr_origin) + '\n')
+log_file.write("new model PSNR_predicted=" + str(avg_psnr_new) + '\n')
+log_file.close()
