@@ -24,6 +24,7 @@ from torchvision import transforms
 from os.path import join
 from math import log10
 import pandas as pd
+import os
 
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
 parser.add_argument("--cuda", action="store_true", help="use cuda?")
@@ -149,6 +150,10 @@ avg_psnr_new = 0.0
 
 
 for img_id, image_name in enumerate(image_list, 1):
+    check = os.path.join('../test/DIV2K_valid_LLR', image_name[-7:-4])
+    if not os.path.exists(check):
+        print("jump over")
+        continue
     log_file = open('log.txt', "a")
     print("Processing ", image_name)
     # since image_name is '../test/LR/804.png'
