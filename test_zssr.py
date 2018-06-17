@@ -171,7 +171,7 @@ for img_id, image_name in enumerate(image_list, 1):
     print("===> Loading datasets")
     # filename = "../test/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
     # train_set = DatasetFromHdf5(filename)
-    training_data_loader = DataLoader(DataValSet_zssr('../test/DIV2K_valid_LLR', image_name[-7:-4]),
+    training_data_loader = DataLoader(DataValSet_zssr_train('../test/DIV2K_valid_LLR', image_name[-7:-4]),
                                       num_workers=opt.threads, \
                                       batch_size=opt.batchSize,
                                       shuffle=True)
