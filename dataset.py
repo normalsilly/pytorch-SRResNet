@@ -147,14 +147,14 @@ class DataValSet_zssr_train(data.Dataset):
         target_image = np.asarray(target_image, np.float32)
         target_image /= 255
 
-        flip_channel = random.randint(0, 1)
-        if flip_channel != 0:
-            input_image = np.flip(input_image, 2)
-            target_image = np.flip(target_image, 2)
-        # randomly rotation
-        rotation_degree = random.randint(0, 3)
-        input_image = np.rot90(input_image, rotation_degree)
-        target_image = np.rot90(target_image, rotation_degree)
+#         flip_channel = random.randint(0, 1)
+#         if flip_channel != 0:
+#             input_image = np.flip(input_image, 2)
+#             target_image = np.flip(target_image, 2)
+#         # randomly rotation
+#         rotation_degree = random.randint(0, 3)
+#         input_image = np.rot90(input_image, rotation_degree)
+#         target_image = np.rot90(target_image, rotation_degree)
         return input_image.copy(), \
                target_image.copy()
 
