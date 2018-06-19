@@ -156,7 +156,10 @@ for img_id, image_name in enumerate(image_list, 1):
     if not os.path.exists(check):
         print("jump over")
         continue
-    log_file = open('log.txt', "a")
+    if opt.trainset:
+        log_file = open('log_small.txt', "a")
+    else:
+        log_file = open('log.txt', "a")
     print("Processing ", image_name)
     # since image_name is '../test/LR/804.png'
     testloader = DataLoader(
@@ -193,9 +196,13 @@ for img_id, image_name in enumerate(image_list, 1):
     print("===> Setting Optimizer")
     optimizer = optim.Adam(model.parameters(), lr=opt.lr)
 
+    if opt.trainset:
+        result_dir = '../test/zssr_small/'
+    else:
+        result_dir = '../test/zssr/'
     print("===> Testing")
     log_file.write(image_name + '\n')
-    avg_psnr_origin += test(testloader, origin_model, criterion, '../test/zssr/', log_file, True, image_name[-7:-4])
+    avg_psnr_origin += test(testloader, origin_model, criterion, result_dir, log_file, True, image_name[-7:-4])
 
     print("===> Training")
     for epoch in range(1, opt.nEpochs + 1):
@@ -203,7 +210,7 @@ for img_id, image_name in enumerate(image_list, 1):
 
     print("===> Testing")
     log_file.write(image_name + '\n')
-    avg_psnr_new += test(testloader, model, criterion, '../test/zssr/', log_file, False, image_name[-7:-4])
+    avg_psnr_new += test(testloader, model, criterion, result_dir, log_file, False, image_name[-7:-4])
     log_file.close()
 
 avg_psnr_origin = avg_psnr_origin / len(image_list)
