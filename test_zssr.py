@@ -38,6 +38,7 @@ parser.add_argument("--batchSize", type=int, default=1, help="testing batch size
 parser.add_argument("--threads", type=int, default=0, help="Number of threads for data loader to use, Default: 1")
 parser.add_argument("--step", type=int, default=200, help="Sets the learning rate to the initial LR decayed by momentum every n epochs, Default: n=500")
 parser.add_argument("--nEpochs", type=int, default=200, help="number of epochs to train for")
+parser.add_argument("--trainset", type=bool, default=True,  help="dataset name, true means use small image")
 
 
 def adjust_learning_rate(optimizer, epoch):
@@ -148,7 +149,10 @@ avg_psnr_new = 0.0
 
 
 for img_id, image_name in enumerate(image_list, 1):
-    check = os.path.join('../test/DIV2K_valid_LLR', image_name[-7:-4])
+    if opt.trainset:
+        check = os.path.join('../test/DIV2K_valid_LLR_small', image_name[-7:-4])
+    else:
+        check = os.path.join('../test/DIV2K_valid_LLR', image_name[-7:-4])
     if not os.path.exists(check):
         print("jump over")
         continue
@@ -158,7 +162,7 @@ for img_id, image_name in enumerate(image_list, 1):
     testloader = DataLoader(
         DataValSet_zssr('../test/', image_name[-7:-4]),
         batch_size=opt.batchSize, shuffle=False, pin_memory=False)
-    
+
     origin_model = torch.load(opt.model)["model"]
     if cuda:
         model = origin_model.cuda()
@@ -175,10 +179,16 @@ for img_id, image_name in enumerate(image_list, 1):
     print("===> Loading datasets")
     # filename = "../test/DIV2K_valid_LLR/DIV2K_LLR_" + str(img_id) + ".h5"
     # train_set = DatasetFromHdf5(filename)
-    training_data_loader = DataLoader(DataValSet_zssr_train('../test/DIV2K_valid_LLR', image_name[-7:-4]),
-                                      num_workers=opt.threads, \
-                                      batch_size=opt.batchSize,
-                                      shuffle=True)
+    if opt.trainset:
+        training_data_loader = DataLoader(DataValSet_zssr_train('../test/DIV2K_valid_LLR_small', image_name[-7:-4]),
+                                          num_workers=opt.threads, \
+                                          batch_size=opt.batchSize,
+                                          shuffle=True)
+    else:
+        training_data_loader = DataLoader(DataValSet_zssr_train('../test/DIV2K_valid_LLR', image_name[-7:-4]),
+                                          num_workers=opt.threads, \
+                                          batch_size=opt.batchSize,
+                                          shuffle=True)
 
     print("===> Setting Optimizer")
     optimizer = optim.Adam(model.parameters(), lr=opt.lr)
