@@ -26,6 +26,13 @@ from math import log10
 import pandas as pd
 import os
 
+
+def boolean_string(s):
+    if s not in {'False', 'True'}:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True'
+
+
 parser = argparse.ArgumentParser(description="PyTorch SRResNet Eval")
 parser.add_argument("--cuda", action="store_true", help="use cuda?")
 parser.add_argument("--model", default="model/model_srresnet.pth", type=str, help="model path") #TODO: change default model
@@ -38,7 +45,7 @@ parser.add_argument("--batchSize", type=int, default=1, help="testing batch size
 parser.add_argument("--threads", type=int, default=0, help="Number of threads for data loader to use, Default: 1")
 parser.add_argument("--step", type=int, default=200, help="Sets the learning rate to the initial LR decayed by momentum every n epochs, Default: n=500")
 parser.add_argument("--nEpochs", type=int, default=200, help="number of epochs to train for")
-parser.add_argument("--trainset", type=bool, default=True,  help="dataset name, true means use small image")
+parser.add_argument("--trainset", type=boolean_string, default=True,  help="dataset name, true means use small image")
 
 
 def adjust_learning_rate(optimizer, epoch):
