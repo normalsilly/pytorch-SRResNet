@@ -140,8 +140,6 @@ if cuda:
     if not torch.cuda.is_available():
             raise Exception("No GPU found or Wrong gpu id, please run without --cuda")
 
-origin_model = torch.load(opt.model)["model"]
-
 image_list = glob.glob('../test/' + opt.dataset + "/*.*")
 image_list = sorted(image_list)
 
@@ -160,7 +158,8 @@ for img_id, image_name in enumerate(image_list, 1):
     testloader = DataLoader(
         DataValSet_zssr('../test/', image_name[-7:-4]),
         batch_size=opt.batchSize, shuffle=False, pin_memory=False)
-
+    
+    origin_model = torch.load(opt.model)["model"]
     if cuda:
         model = origin_model.cuda()
     else:
